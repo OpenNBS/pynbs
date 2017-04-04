@@ -92,3 +92,16 @@ class File(object):
             yield Instrument(i, self.read_string(), self.read_string(),
                              self.read_numeric(BYTE),
                              self.read_numeric(BYTE) == 1)
+
+    def song(self):
+        if not self.notes:
+            return
+        chord = []
+        current_tick = self.notes[0].tick
+
+        for note in self.notes:
+            if note.tick == current_tick:
+                chord.append(note)
+            else:
+                yield current_tick, chord
+                current_tick, chord = note.tick, [note]
