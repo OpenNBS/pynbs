@@ -13,7 +13,8 @@ INT = Struct('<i')
 
 Note = namedtuple('Note', ['tick', 'layer', 'instrument', 'key'])
 Layer = namedtuple('Layer', ['id', 'name', 'volume'])
-Instrument = namedtuple('Instrument', ['id', 'name', 'file', 'pitch', 'key'])
+Instrument = namedtuple('Instrument', ['id', 'name', 'file', 'pitch',
+                                       'press_key'])
 
 
 def read(filename):
@@ -89,4 +90,5 @@ class File(object):
     def parse_instruments(self):
         for i in range(self.read_numeric(BYTE)):
             yield Instrument(i, self.read_string(), self.read_string(),
-                             self.read_numeric(BYTE), self.read_numeric(BYTE))
+                             self.read_numeric(BYTE),
+                             self.read_numeric(BYTE) == 1)
