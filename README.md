@@ -15,6 +15,9 @@ import pynbs
 my_file = pynbs.read('demo_song.nbs')
 print(my_file.header.tempo)
 print(my_file.notes)
+
+for tick, chord in my_file.song():
+    print(tick, [note.key for note in chord])
 ```
 
 
@@ -77,3 +80,15 @@ name      | `str`  | The name of the instrument.
 file      | `str`  | The name of the sound file of the instrument.
 pitch     | `int`  | The pitch of the instrument. (between 0 and 87)
 press_key | `bool` | Whether the piano should automatically press keys with the instrument when the marker passes them.
+
+
+### .song()
+Returns a generator that yields consecutively all the chords of the song with
+the associated tick:
+
+```python
+for tick, chord in my_file.song():
+    ...
+```
+
+`chord` is a list of all the notes that play during the tick `tick`.
