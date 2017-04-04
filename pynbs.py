@@ -84,8 +84,8 @@ class File(object):
                            self.read_numeric(BYTE), self.read_numeric(BYTE))
 
     def parse_layers(self):
-        return (Layer(i, self.read_string(), self.read_numeric(BYTE))
-                for i in range(self.header.song_layers))
+        for i in range(self.header.song_layers):
+            yield Layer(i, self.read_string(), self.read_numeric(BYTE))
 
     def parse_instruments(self):
         for i in range(self.read_numeric(BYTE)):
