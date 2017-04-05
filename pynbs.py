@@ -3,7 +3,7 @@ from struct import Struct
 from collections import namedtuple
 
 
-__all__ = ['read', 'File', 'Header', 'Note', 'Layer', 'Instrument']
+__all__ = ['read', 'Parser', 'File', 'Header', 'Note', 'Layer', 'Instrument']
 
 
 BYTE = Struct('<b')
@@ -18,35 +18,55 @@ Instrument = namedtuple('Instrument', ['id', 'name', 'file', 'pitch',
 
 
 def read(filename):
-    return File(open(filename, 'rb'))
+    with open(filename, 'rb') as buff:
+        return Parser(buff).read_file()
 
 
 class Header(object):
     def __init__(self, headers):
-        for key, value in headers.items():
+        for key, value in headers:
             setattr(self, key, value)
 
 
 class File(object):
+    def __init__(self, header, notes, layers, instruments):
+        self.header = header
+        self.notes = notes
+        self.layers = layers
+        self.instruments = instruments
+
+    def song(self):
+        if not self.notes:
+            return
+        chord = []
+        current_tick = self.notes[0].tick
+
+        for note in self.notes:
+            if note.tick == current_tick:
+                chord.append(note)
+            else:
+                yield current_tick, chord
+                current_tick, chord = note.tick, [note]
+
+
+class Parser(object):
     def __init__(self, buff):
-        self.filename = buff.name
-        self._buffer = buff
+        self.buffer = buff
 
-        self.header = Header(self.parse_header())
-        self.notes = list(self.parse_notes())
-        self.layers = list(self.parse_layers())
-        self.instruments = list(self.parse_instruments())
-
-        self._buffer.close()
+    def read_file(self):
+        header = Header(self.parse_header().items())
+        return File(header, list(self.parse_notes()),
+                    list(self.parse_layers(header.song_layers)),
+                    list(self.parse_instruments()))
 
     def read_numeric(self, fmt):
-        return fmt.unpack(self._buffer.read(fmt.size))[0]
+        return fmt.unpack(self.buffer.read(fmt.size))[0]
 
     def read_string(self):
         length = self.read_numeric(INT)
-        return self._buffer.read(length).decode()
+        return self.buffer.read(length).decode()
 
-    def _jump(self):
+    def jump(self):
         value = -1
         while True:
             jump = self.read_numeric(SHORT)
@@ -78,13 +98,13 @@ class File(object):
         }
 
     def parse_notes(self):
-        for current_tick in self._jump():
-            for current_layer in self._jump():
+        for current_tick in self.jump():
+            for current_layer in self.jump():
                 yield Note(current_tick, current_layer,
                            self.read_numeric(BYTE), self.read_numeric(BYTE))
 
-    def parse_layers(self):
-        for i in range(self.header.song_layers):
+    def parse_layers(self, layers_count):
+        for i in range(layers_count):
             yield Layer(i, self.read_string(), self.read_numeric(BYTE))
 
     def parse_instruments(self):
@@ -92,16 +112,3 @@ class File(object):
             yield Instrument(i, self.read_string(), self.read_string(),
                              self.read_numeric(BYTE),
                              self.read_numeric(BYTE) == 1)
-
-    def song(self):
-        if not self.notes:
-            return
-        chord = []
-        current_tick = self.notes[0].tick
-
-        for note in self.notes:
-            if note.tick == current_tick:
-                chord.append(note)
-            else:
-                yield current_tick, chord
-                current_tick, chord = note.tick, [note]
