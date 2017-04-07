@@ -5,7 +5,8 @@ from struct import Struct
 from collections import namedtuple
 
 
-__all__ = ['read', 'Parser', 'File', 'Header', 'Note', 'Layer', 'Instrument']
+__all__ = ['read', 'blank_file', 'Parser', 'Writer', 'File', 'Header',
+           'Note', 'Layer', 'Instrument']
 
 
 BYTE = Struct('<b')
