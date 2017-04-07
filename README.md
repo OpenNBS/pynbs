@@ -2,12 +2,12 @@
 
 # pynbs
 
-A simple python parser for [.nbs files](http://www.stuffbydavid.com/mcnbs/format)
+A simple python library to deal with [.nbs files](http://www.stuffbydavid.com/mcnbs/format)
 from [Note Block Studio](http://www.stuffbydavid.com/mcnbs). Compatible with
 python 2 and 3.
 
 
-## Usage
+## Reading files
 
 ```python
 import pynbs
@@ -21,7 +21,11 @@ for tick, chord in my_file.song():
 ```
 
 
-### .header
+### read(filename)
+Read and parse the file at the specified location.
+
+
+### File.header
 The header holds all the fields that are defined in the file header.
 
 Attribute          | Type    | Details
@@ -46,7 +50,7 @@ song_origin        | `str`   | The file name of the original midi or schematic.
 For more information check out the [official specification](http://www.stuffbydavid.com/mcnbs/format).
 
 
-### .notes
+### File.notes
 This is a list of all the notes of the song in order. Each note has the
 following attributes:
 
@@ -58,7 +62,7 @@ instrument | `int` | The id of the instrument.
 key        | `int` | The key of the note. (between 0 and 87)
 
 
-### .layers
+### File.layers
 A list of all the layers of the song in order. Each layer has the following
 attributes:
 
@@ -69,7 +73,7 @@ name      | `str` | The name of the layer.
 volume    | `int` | The volume of the layer.
 
 
-### .instruments
+### File.instruments
 A list of all the custom instruments of the song in order. Each instrument has
 the following attributes:
 
@@ -82,7 +86,7 @@ pitch     | `int`  | The pitch of the instrument. (between 0 and 87)
 press_key | `bool` | Whether the piano should automatically press keys with the instrument when the marker passes them.
 
 
-### .song()
+### File.song()
 Returns a generator that yields consecutively all the chords of the song with
 the associated tick:
 
@@ -92,3 +96,25 @@ for tick, chord in my_file.song():
 ```
 
 `chord` is a list of all the notes that play during the tick `tick`.
+
+
+## Editing and saving files
+
+```python
+import pynbs
+
+new_file = pynbs.blank_file()
+new_file.header.song_name = 'Hello world'
+new_file.notes = [pynbs.Note(tick=i, layer=0, instrument=0, key=i + 35)
+                  for i in range(10)]
+
+new_file.save('new_file.nbs')
+```
+
+
+### blank_file()
+Create a new blank nbs file.
+
+
+### File.save(filename)
+Encode and write the file to the specified location.
