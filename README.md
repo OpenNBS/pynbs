@@ -35,7 +35,7 @@ description        | `str`   | The description of the song.
 tempo              | `float` | The tempo of the song.
 auto_save          | `bool`  | Whether auto-saving has been enabled.
 auto_save_duration | `int`   | The amount of minutes between each auto-save.
-time_signature     | `str`   | The time signature of the song.
+time_signature     | `int`   | The time signature of the song.
 minutes_spent      | `int`   | The amount of minutes spent on the project.
 left_clicks        | `int`   | The amount of times the user have left clicked.
 right_clicks       | `int`   | The amount of times the user have right clicked.

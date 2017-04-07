@@ -87,7 +87,7 @@ class Parser(object):
             'tempo':               self.read_numeric(SHORT) / 100.0,
             'auto_save':           self.read_numeric(BYTE) == 1,
             'auto_save_duration':  self.read_numeric(BYTE),
-            'time_signature':      '{}/4'.format(self.read_numeric(BYTE)),
+            'time_signature':      self.read_numeric(BYTE),
 
             'minutes_spent':       self.read_numeric(INT),
             'left_clicks':         self.read_numeric(INT),
