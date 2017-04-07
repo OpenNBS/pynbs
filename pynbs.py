@@ -24,6 +24,30 @@ def read(filename):
         return Parser(buff).read_file()
 
 
+def blank_file():
+    header = {
+        'song_length': 0,
+        'song_layers': 0,
+        'song_name': '',
+        'song_author': '',
+        'original_author': '',
+        'description': '',
+
+        'tempo': 10.0,
+        'auto_save': False,
+        'auto_save_duration': 10,
+        'time_signature': 4,
+
+        'minutes_spent': 0,
+        'left_clicks': 0,
+        'right_clicks': 0,
+        'blocks_added': 0,
+        'blocks_removed': 0,
+        'song_origin': '',
+    }
+    return File(Header(header.items()), [], [Layer(0, '', 100)], [])
+
+
 class Header(object):
     def __init__(self, headers):
         for key, value in headers:
@@ -37,18 +61,30 @@ class File(object):
         self.layers = layers
         self.instruments = instruments
 
+    def update_header(self):
+        if self.notes:
+            self.header.song_length = self.notes[-1].tick
+        self.header.song_layers = len(self.layers)
+
+    def save(self, filename):
+        self.update_header()
+        with open(filename, 'wb') as buff:
+            Writer(buff).encode_file(self)
+
     def song(self):
         if not self.notes:
             return
         chord = []
         current_tick = self.notes[0].tick
 
-        for note in self.notes:
+        for note in sorted(self.notes, key=lambda n: n.tick):
             if note.tick == current_tick:
                 chord.append(note)
             else:
+                chord.sort(key=lambda n: n.layer)
                 yield current_tick, chord
                 current_tick, chord = note.tick, [note]
+        yield current_tick, chord
 
 
 class Parser(object):
@@ -114,3 +150,73 @@ class Parser(object):
             yield Instrument(i, self.read_string(), self.read_string(),
                              self.read_numeric(BYTE),
                              self.read_numeric(BYTE) == 1)
+
+
+class Writer(object):
+    def __init__(self, buff):
+        self.buffer = buff
+
+    def encode_file(self, nbs_file):
+        self.write_header(nbs_file)
+        self.write_notes(nbs_file)
+        self.write_layers(nbs_file)
+        self.write_instruments(nbs_file)
+
+    def encode_numeric(self, fmt, value):
+        self.buffer.write(fmt.pack(value))
+
+    def encode_string(self, value):
+        self.encode_numeric(INT, len(value))
+        self.buffer.write(value.encode())
+
+    def write_header(self, nbs_file):
+        header = nbs_file.header
+
+        self.encode_numeric(SHORT, header.song_length)
+        self.encode_numeric(SHORT, header.song_layers)
+        self.encode_string(header.song_name)
+        self.encode_string(header.song_author)
+        self.encode_string(header.original_author)
+        self.encode_string(header.description)
+
+        self.encode_numeric(SHORT, int(header.tempo * 100))
+        self.encode_numeric(BYTE, int(header.auto_save))
+        self.encode_numeric(BYTE, header.auto_save_duration)
+        self.encode_numeric(BYTE, header.time_signature)
+
+        self.encode_numeric(INT, header.minutes_spent)
+        self.encode_numeric(INT, header.left_clicks)
+        self.encode_numeric(INT, header.right_clicks)
+        self.encode_numeric(INT, header.blocks_added)
+        self.encode_numeric(INT, header.blocks_removed)
+        self.encode_string(header.song_origin)
+
+    def write_notes(self, nbs_file):
+        current_tick = -1
+
+        for tick, chord in nbs_file.song():
+            self.encode_numeric(SHORT, tick - current_tick)
+            current_tick = tick
+            current_layer = -1
+
+            for note in chord:
+                self.encode_numeric(SHORT, note.layer - current_layer)
+                current_layer = note.layer
+                self.encode_numeric(BYTE, note.instrument)
+                self.encode_numeric(BYTE, note.key)
+
+            self.encode_numeric(SHORT, 0)
+        self.encode_numeric(SHORT, 0)
+
+    def write_layers(self, nbs_file):
+        for layer in nbs_file.layers:
+            self.encode_string(layer.name)
+            self.encode_numeric(BYTE, layer.volume)
+
+    def write_instruments(self, nbs_file):
+        self.encode_numeric(BYTE, len(nbs_file.instruments))
+        for instrument in nbs_file.instruments:
+            self.encode_string(instrument.name)
+            self.encode_string(instrument.file)
+            self.encode_numeric(BYTE, instrument.pitch)
+            self.encode_numeric(BYTE, int(instrument.press_key))
