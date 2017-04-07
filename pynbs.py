@@ -1,4 +1,6 @@
 
+from builtins import range
+
 from struct import Struct
 from collections import namedtuple
 
