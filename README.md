@@ -1,5 +1,8 @@
 # pynbs
 
+[![PyPI](https://img.shields.io/pypi/v/pynbs.svg)](https://pypi.org/project/pynbs/)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/pynbs.svg)](https://pypi.org/project/pynbs/)
+
 > A simple python library to read and write [.nbs files](http://www.stuffbydavid.com/mcnbs/format)
 from [Note Block Studio](http://www.stuffbydavid.com/mcnbs). Compatible with
 python 2 and 3.
