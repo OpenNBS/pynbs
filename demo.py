@@ -15,7 +15,7 @@ print(my_file.notes)
 print(my_file.layers)
 print(my_file.instruments)
 
-for tick, chord in my_file.song():
+for tick, chord in my_file:
     print(tick, [note.key for note in chord])
 
 

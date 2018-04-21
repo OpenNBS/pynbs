@@ -1,5 +1,9 @@
+from __future__ import print_function, division, absolute_import
 
-from builtins import range
+try:
+    from builtins import range
+except ImportError:
+    range = xrange
 
 from struct import Struct
 from collections import namedtuple
@@ -72,7 +76,7 @@ class File(object):
         with open(filename, 'wb') as buff:
             Writer(buff).encode_file(self)
 
-    def song(self):
+    def __iter__(self):
         if not self.notes:
             return
         chord = []
@@ -195,7 +199,7 @@ class Writer(object):
     def write_notes(self, nbs_file):
         current_tick = -1
 
-        for tick, chord in nbs_file.song():
+        for tick, chord in nbs_file:
             self.encode_numeric(SHORT, tick - current_tick)
             current_tick = tick
             current_layer = -1
