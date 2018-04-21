@@ -3,22 +3,22 @@ from __future__ import print_function
 import pynbs
 
 
-# read file
+# Read file
 
-my_file = pynbs.read('demo_song.nbs')
+demo_song = pynbs.read('demo_song.nbs')
 
-print(my_file.header.song_length)
-print(my_file.header.description)
+print(demo_song.header.song_length)
+print(demo_song.header.description)
 
-print(my_file.notes)
-print(my_file.layers)
-print(my_file.instruments)
+print(demo_song.notes)
+print(demo_song.layers)
+print(demo_song.instruments)
 
-for tick, chord in my_file:
+for tick, chord in demo_song:
     print(tick, [note.key for note in chord])
 
 
-# new file
+# Create new file
 
 new_file = pynbs.new_file(
     song_name='foo',
@@ -26,7 +26,7 @@ new_file = pynbs.new_file(
 )
 
 
-# edit file
+# Edit file
 
 new_file.notes.extend([
     pynbs.Note(tick=0, layer=0, instrument=0, key=45),
@@ -37,5 +37,8 @@ new_file.notes.extend([
 ])
 
 new_file.header.blocks_added = 9000
+
+
+# Save file
 
 new_file.save('new_file.nbs')
