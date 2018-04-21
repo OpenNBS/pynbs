@@ -29,6 +29,14 @@ new_file.notes.extend([
 new_file.save('new_file.nbs')
 ```
 
+## Installation
+
+The package can be installed with `pip`.
+
+```bash
+$ pip install pynbs
+```
+
 ## Basic usage
 
 ### Reading files
