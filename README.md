@@ -1,11 +1,8 @@
-
-
 # pynbs
 
-A simple python library to deal with [.nbs files](http://www.stuffbydavid.com/mcnbs/format)
+A simple python library to read and write [.nbs files](http://www.stuffbydavid.com/mcnbs/format)
 from [Note Block Studio](http://www.stuffbydavid.com/mcnbs). Compatible with
 python 2 and 3.
-
 
 ## Reading files
 
@@ -20,12 +17,12 @@ for tick, chord in my_file.song():
     print(tick, [note.key for note in chord])
 ```
 
-
 ### read(filename)
+
 Read and parse the file at the specified location.
 
-
 ### File.header
+
 The header holds all the fields that are defined in the file header.
 
 Attribute          | Type    | Details
@@ -49,8 +46,8 @@ song_origin        | `str`   | The file name of the original midi or schematic.
 
 For more information check out the [official specification](http://www.stuffbydavid.com/mcnbs/format).
 
-
 ### File.notes
+
 This is a list of all the notes of the song in order. Each note has the
 following attributes:
 
@@ -61,8 +58,8 @@ layer      | `int` | The id of the layer in which the note is placed.
 instrument | `int` | The id of the instrument.
 key        | `int` | The key of the note. (between 0 and 87)
 
-
 ### File.layers
+
 A list of all the layers of the song in order. Each layer has the following
 attributes:
 
@@ -72,8 +69,8 @@ id        | `int` | The id of the layer.
 name      | `str` | The name of the layer.
 volume    | `int` | The volume of the layer.
 
-
 ### File.instruments
+
 A list of all the custom instruments of the song in order. Each instrument has
 the following attributes:
 
@@ -85,8 +82,8 @@ file      | `str`  | The name of the sound file of the instrument.
 pitch     | `int`  | The pitch of the instrument. (between 0 and 87)
 press_key | `bool` | Whether the piano should automatically press keys with the instrument when the marker passes them.
 
-
 ### File.song()
+
 Returns a generator that yields consecutively all the chords of the song with
 the associated tick:
 
@@ -96,7 +93,6 @@ for tick, chord in my_file.song():
 ```
 
 `chord` is a list of all the notes that play during the tick `tick`.
-
 
 ## Editing and saving files
 
@@ -111,10 +107,14 @@ new_file.notes = [pynbs.Note(tick=i, layer=0, instrument=0, key=i + 35)
 new_file.save('new_file.nbs')
 ```
 
-
 ### blank_file()
+
 Create a new blank nbs file.
 
-
 ### File.save(filename)
+
 Encode and write the file to the specified location.
+
+---
+
+License - [MIT](https://github.com/vberlier/pynbs/blob/master/LICENSE)
