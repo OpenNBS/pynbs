@@ -9,7 +9,7 @@ from struct import Struct
 from collections import namedtuple
 
 
-__all__ = ['read', 'blank_file', 'Parser', 'Writer', 'File', 'Header',
+__all__ = ['read', 'new_file', 'Parser', 'Writer', 'File', 'Header',
            'Note', 'Layer', 'Instrument']
 
 
@@ -29,33 +29,34 @@ def read(filename):
         return Parser(buff).read_file()
 
 
-def blank_file():
-    header = {
-        'song_length': 0,
-        'song_layers': 0,
-        'song_name': '',
-        'song_author': '',
-        'original_author': '',
-        'description': '',
-
-        'tempo': 10.0,
-        'auto_save': False,
-        'auto_save_duration': 10,
-        'time_signature': 4,
-
-        'minutes_spent': 0,
-        'left_clicks': 0,
-        'right_clicks': 0,
-        'blocks_added': 0,
-        'blocks_removed': 0,
-        'song_origin': '',
-    }
-    return File(Header(header.items()), [], [Layer(0, '', 100)], [])
+def new_file(**header):
+    return File(Header(**header), [], [Layer(0, '', 100)], [])
 
 
 class Header(object):
-    def __init__(self, headers):
-        for key, value in headers:
+    def __init__(self, **header):
+        header_values = {
+            'song_length':          header.get('song_length', 0),
+            'song_layers':          header.get('song_layers', 0),
+            'song_name':            header.get('song_name', ''),
+            'song_author':          header.get('song_author', ''),
+            'original_author':      header.get('original_author', ''),
+            'description':          header.get('description', ''),
+
+            'tempo':                header.get('tempo', 10.0),
+            'auto_save':            header.get('auto_save', False),
+            'auto_save_duration':   header.get('auto_save_duration', 10),
+            'time_signature':       header.get('time_signature', 4),
+
+            'minutes_spent':        header.get('minutes_spent', 0),
+            'left_clicks':          header.get('left_clicks', 0),
+            'right_clicks':         header.get('right_clicks', 0),
+            'blocks_added':         header.get('blocks_added', 0),
+            'blocks_removed':       header.get('blocks_removed', 0),
+            'song_origin':          header.get('song_origin', ''),
+        }
+
+        for key, value in header_values.items():
             setattr(self, key, value)
 
 
@@ -97,7 +98,7 @@ class Parser(object):
         self.buffer = buff
 
     def read_file(self):
-        header = Header(self.parse_header().items())
+        header = Header(**self.parse_header())
         return File(header, list(self.parse_notes()),
                     list(self.parse_layers(header.song_layers)),
                     list(self.parse_instruments()))
