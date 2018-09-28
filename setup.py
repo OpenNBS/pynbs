@@ -14,7 +14,7 @@ setup(
     long_description_content_type='text/markdown',
 
     author='Valentin Berlier',
-    author_email='berlier.v@mail.com',
+    author_email='berlier.v@gmail.com',
     url='https://github.com/vberlier/pynbs',
 
     platforms=['any'],
