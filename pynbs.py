@@ -105,9 +105,10 @@ class Parser(object):
         self.buffer = buff
 
     def read_file(self):
-        header = Header(**self.parse_header())
+        use_old_format, values = self.parse_header()
+        header = Header(**values)
         return File(header, list(self.parse_notes()),
-                    list(self.parse_layers(header.song_layers)),
+                    list(self.parse_layers(header.song_layers, use_old_format)),
                     list(self.parse_instruments()))
 
     def read_numeric(self, fmt):
@@ -127,15 +128,13 @@ class Parser(object):
             yield value
 
     def parse_header(self):
-        if self.read_numeric(SHORT) != 0:
-            raise DeprecationWarning(
-                        "The file you're trying to open was saved in an "
-                        "older format. Please save the file in Note "
-                        "Block Studio 3.6.0 or newer before importing.")
-        return {
-            'version':             self.read_numeric(BYTE),
-            'default_instruments': self.read_numeric(BYTE),
-            'song_length':         self.read_numeric(SHORT),
+        song_length = self.read_numeric(SHORT)
+        use_old_format = song_length != 0
+
+        return use_old_format, {
+            'version':             3 if use_old_format else self.read_numeric(BYTE),
+            'default_instruments': 16 if use_old_format else self.read_numeric(BYTE),
+            'song_length':         song_length if use_old_format else self.read_numeric(SHORT),
             'song_layers':         self.read_numeric(SHORT),
             'song_name':           self.read_string(),
             'song_author':         self.read_string(),
@@ -161,10 +160,10 @@ class Parser(object):
                 yield Note(current_tick, current_layer,
                            self.read_numeric(BYTE), self.read_numeric(BYTE))
 
-    def parse_layers(self, layers_count):
+    def parse_layers(self, layers_count, use_old_format):
         for i in range(layers_count):
             yield Layer(i, self.read_string(), self.read_numeric(BYTE),
-                        self.read_numeric(BYTE))
+                        100 if use_old_format else self.read_numeric(BYTE))
 
     def parse_instruments(self):
         for i in range(self.read_numeric(BYTE)):
