@@ -19,9 +19,14 @@ INT = Struct('<i')
 
 
 Note = namedtuple('Note', ['tick', 'layer', 'instrument', 'key'])
-Layer = namedtuple('Layer', ['id', 'name', 'volume', 'panning'])
 Instrument = namedtuple('Instrument', ['id', 'name', 'file', 'pitch',
                                        'press_key'])
+
+
+class Layer(namedtuple('Layer', ['id', 'name', 'volume', 'panning'])):
+    def __new__(cls, id, name, volume, panning=100):
+        # Default panning to 100 to not break backward compatibility
+        return super().__new__(cls, id, name, volume, panning)
 
 
 def read(filename):
