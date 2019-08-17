@@ -5,17 +5,18 @@ import pynbs
 
 # Read file
 
-demo_song = pynbs.read('demo_song.nbs')
+for song_name in ['demo_song.nbs', 'old_demo_song.nbs']:
+    demo_song = pynbs.read(song_name)
 
-print(demo_song.header.song_length)
-print(demo_song.header.description)
+    print(demo_song.header.song_length)
+    print(demo_song.header.description)
 
-print(demo_song.notes)
-print(demo_song.layers)
-print(demo_song.instruments)
+    print(demo_song.notes)
+    print(demo_song.layers)
+    print(demo_song.instruments)
 
-for tick, chord in demo_song:
-    print(tick, [note.key for note in chord])
+    for tick, chord in demo_song:
+        print(tick, [note.key for note in chord])
 
 
 # Create new file
