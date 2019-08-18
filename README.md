@@ -3,8 +3,8 @@
 [![PyPI](https://img.shields.io/pypi/v/pynbs.svg)](https://pypi.org/project/pynbs/)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/pynbs.svg)](https://pypi.org/project/pynbs/)
 
-> A simple python library to read and write [.nbs files](http://www.stuffbydavid.com/mcnbs/format)
-from [Note Block Studio](http://www.stuffbydavid.com/mcnbs). Compatible with
+> A simple python library to read and write [.nbs files](https://hielkeminecraft.github.io/OpenNoteBlockStudio/nbs)
+from [Open Note Block Studio](https://hielkeminecraft.github.io/OpenNoteBlockStudio/). Compatible with
 python 2 and 3.
 
 `pynbs` makes it possible to easily iterate over Note Block Studio songs.
@@ -37,6 +37,10 @@ The package can be installed with `pip`.
 $ pip install pynbs
 ```
 
+The latest release follows the latest version of the nbs file format
+[specification](https://hielkeminecraft.github.io/OpenNoteBlockStudio/nbs)
+(version 3).
+
 ## Basic usage
 
 ### Reading files
@@ -61,6 +65,8 @@ header = demo_song.header
 
 Attribute                   | Type    | Details
 :---------------------------|:--------|:------------------------------------------------
+`header.version`            | `int`   | The NBS format version.
+`header.default_instruments`| `int`   | The amount of instruments from vanilla Minecraft in the song.
 `header.song_length`        | `int`   | The length of the song, measured in ticks.
 `header.song_layers`        | `int`   | The id of the last layer with at least one note block in it.
 `header.song_name`          | `str`   | The name of the song.
@@ -78,7 +84,7 @@ Attribute                   | Type    | Details
 `header.blocks_removed`     | `int`   | The amount of times the user have removed a block.
 `header.song_origin`        | `str`   | The file name of the original midi or schematic.
 
-> For more information about all these fields, check out the [official specification](http://www.stuffbydavid.com/mcnbs/format).
+> For more information about all these fields, check out the [official specification](https://hielkeminecraft.github.io/OpenNoteBlockStudio/nbs).
 
 #### Notes
 
@@ -108,6 +114,7 @@ Attribute         | Type  | Details
 `layer.id`        | `int` | The id of the layer.
 `layer.name`      | `str` | The name of the layer.
 `layer.volume`    | `int` | The volume of the layer.
+`layer.panning`   | `int` | The stereo panning of the layer.
 
 #### Instruments
 
@@ -157,6 +164,20 @@ location.
 
 ```python
 new_file.save('new_file.nbs')
+```
+
+### Upgrading old files
+
+While `pynbs` is up-to-date with the specification of the open source continuation
+of Minecraft Note Block studio, the original file format is still supported by the
+`read()` function, making it possible to bulk upgrade songs to the new format.
+
+```python
+import glob
+import pynbs
+
+for old_file in glob.glob('*.nbs'):
+    pynbs.read(old_file).save(old_file)
 ```
 
 ---

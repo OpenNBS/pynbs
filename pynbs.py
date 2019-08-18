@@ -19,9 +19,14 @@ INT = Struct('<i')
 
 
 Note = namedtuple('Note', ['tick', 'layer', 'instrument', 'key'])
-Layer = namedtuple('Layer', ['id', 'name', 'volume'])
 Instrument = namedtuple('Instrument', ['id', 'name', 'file', 'pitch',
                                        'press_key'])
+
+
+class Layer(namedtuple('Layer', ['id', 'name', 'volume', 'panning'])):
+    def __new__(cls, id, name, volume, panning=100):
+        # Default panning to 100 to not break backward compatibility
+        return super().__new__(cls, id, name, volume, panning)
 
 
 def read(filename):
@@ -30,12 +35,14 @@ def read(filename):
 
 
 def new_file(**header):
-    return File(Header(**header), [], [Layer(0, '', 100)], [])
+    return File(Header(**header), [], [Layer(0, '', 100, 100)], [])
 
 
 class Header(object):
     def __init__(self, **header):
         header_values = {
+            'version':              header.get('version', 3),
+            'default_instruments':  header.get('default_instruments', 16),
             'song_length':          header.get('song_length', 0),
             'song_layers':          header.get('song_layers', 0),
             'song_name':            header.get('song_name', ''),
@@ -98,9 +105,10 @@ class Parser(object):
         self.buffer = buff
 
     def read_file(self):
-        header = Header(**self.parse_header())
+        use_old_format, values = self.parse_header()
+        header = Header(**values)
         return File(header, list(self.parse_notes()),
-                    list(self.parse_layers(header.song_layers)),
+                    list(self.parse_layers(header.song_layers, use_old_format)),
                     list(self.parse_instruments()))
 
     def read_numeric(self, fmt):
@@ -120,8 +128,13 @@ class Parser(object):
             yield value
 
     def parse_header(self):
-        return {
-            'song_length':         self.read_numeric(SHORT),
+        song_length = self.read_numeric(SHORT)
+        use_old_format = song_length != 0
+
+        return use_old_format, {
+            'version':             3 if use_old_format else self.read_numeric(BYTE),
+            'default_instruments': 16 if use_old_format else self.read_numeric(BYTE),
+            'song_length':         song_length if use_old_format else self.read_numeric(SHORT),
             'song_layers':         self.read_numeric(SHORT),
             'song_name':           self.read_string(),
             'song_author':         self.read_string(),
@@ -147,9 +160,10 @@ class Parser(object):
                 yield Note(current_tick, current_layer,
                            self.read_numeric(BYTE), self.read_numeric(BYTE))
 
-    def parse_layers(self, layers_count):
+    def parse_layers(self, layers_count, use_old_format):
         for i in range(layers_count):
-            yield Layer(i, self.read_string(), self.read_numeric(BYTE))
+            yield Layer(i, self.read_string(), self.read_numeric(BYTE),
+                        100 if use_old_format else self.read_numeric(BYTE))
 
     def parse_instruments(self):
         for i in range(self.read_numeric(BYTE)):
@@ -178,6 +192,9 @@ class Writer(object):
     def write_header(self, nbs_file):
         header = nbs_file.header
 
+        self.encode_numeric(SHORT, 0)
+        self.encode_numeric(BYTE, header.version)
+        self.encode_numeric(BYTE, header.default_instruments)
         self.encode_numeric(SHORT, header.song_length)
         self.encode_numeric(SHORT, header.song_layers)
         self.encode_string(header.song_name)
@@ -218,6 +235,7 @@ class Writer(object):
         for layer in nbs_file.layers:
             self.encode_string(layer.name)
             self.encode_numeric(BYTE, layer.volume)
+            self.encode_numeric(BYTE, layer.panning)
 
     def write_instruments(self, nbs_file):
         self.encode_numeric(BYTE, len(nbs_file.instruments))
