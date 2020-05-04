@@ -39,7 +39,8 @@ $ pip install pynbs
 
 The latest release follows the latest version of the nbs file format
 [specification](https://hielkeminecraft.github.io/OpenNoteBlockStudio/nbs)
-(version 3).
+(version 4). However, it also allows you to load and save files in any of
+the older versions.
 
 ## Basic usage
 
@@ -65,7 +66,7 @@ header = demo_song.header
 
 Attribute                   | Type    | Details
 :---------------------------|:--------|:------------------------------------------------
-`header.version`            | `int`   | The NBS format version.
+`header.version`            | `int`   | The NBS version this file was saved on.
 `header.default_instruments`| `int`   | The amount of instruments from vanilla Minecraft in the song.
 `header.song_length`        | `int`   | The length of the song, measured in ticks.
 `header.song_layers`        | `int`   | The id of the last layer with at least one note block in it.
@@ -83,6 +84,9 @@ Attribute                   | Type    | Details
 `header.blocks_added`       | `int`   | The amount of times the user have added a block.
 `header.blocks_removed`     | `int`   | The amount of times the user have removed a block.
 `header.song_origin`        | `str`   | The file name of the original midi or schematic.
+`header.loop`               | `bool`  | Whether the song should loop back to the start after ending.
+`header.max_loop_count`     | `int`   | The amount of times to loop. 0 = infinite.
+`header.loop_start`         | `int`   | The tick the song will loop back to at the end of playback.
 
 > For more information about all these fields, check out the [official specification](https://hielkeminecraft.github.io/OpenNoteBlockStudio/nbs).
 
@@ -100,6 +104,9 @@ Attribute         | Type  | Details
 `note.layer`      | `int` | The id of the layer in which the note is placed.
 `note.instrument` | `int` | The id of the instrument.
 `note.key`        | `int` | The key of the note. (between 0 and 87)
+`note.velocity`   | `int` | The velocity of the note. (between 0 and 100)
+`note.panning`    | `int` | The stereo panning of the note. (between -100 and 100)
+`note.pitch`      | `int` | The detune of the note, in cents. (between -1200 and 1200)
 
 #### Layers
 
@@ -113,6 +120,7 @@ Attribute         | Type  | Details
 :-----------------|:------|:------------------------
 `layer.id`        | `int` | The id of the layer.
 `layer.name`      | `str` | The name of the layer.
+`layer.lock`      | `bool`| Whether the layer is locked.
 `layer.volume`    | `int` | The volume of the layer.
 `layer.panning`   | `int` | The stereo panning of the layer.
 
@@ -166,11 +174,22 @@ location.
 new_file.save('new_file.nbs')
 ```
 
+By default, the file will be saved in the latest NBS version available.
+To save the file in an older version, you can use the `version` parameter:
+
+```python
+# This will save the song in the classic format.
+new_file.save('new_file.nbs', version=0)
+```
+
+(Keep in mind some of the song properties may be lost when saving in older versions.)
+
 ### Upgrading old files
 
-While `pynbs` is up-to-date with the specification of the open source continuation
-of Minecraft Note Block studio, the original file format is still supported by the
-`read()` function, making it possible to bulk upgrade songs to the new format.
+While `pynbs` is up-to-date with the latest version of the Open Note Block Studio
+specification, all previous versions — including the original file format — are still
+supported by the `read()` function, making it possible to bulk upgrade songs to the
+most recent version:
 
 ```python
 import glob
