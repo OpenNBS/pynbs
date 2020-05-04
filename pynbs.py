@@ -12,21 +12,29 @@ from collections import namedtuple
 __all__ = ['read', 'new_file', 'Parser', 'Writer', 'File', 'Header',
            'Note', 'Layer', 'Instrument']
 
+CURRENT_NBS_VERSION = 4
 
 BYTE = Struct('<b')
 SHORT = Struct('<h')
+SSHORT = Struct('<H')
 INT = Struct('<i')
 
 
-Note = namedtuple('Note', ['tick', 'layer', 'instrument', 'key'])
+
 Instrument = namedtuple('Instrument', ['id', 'name', 'file', 'pitch',
                                        'press_key'])
 
 
-class Layer(namedtuple('Layer', ['id', 'name', 'volume', 'panning'])):
-    def __new__(cls, id, name, volume, panning=100):
-        # Default panning to 100 to not break backward compatibility
-        return super().__new__(cls, id, name, volume, panning)
+class Note(namedtuple('Note', ['tick', 'layer', 'instrument', 'key',
+                      'velocity', 'panning', 'pitch'])):
+    def __new__(cls, tick, layer, instrument, key, velocity=100,
+               panning=0, pitch=0):
+        return super().__new__(cls, tick, layer, instrument, key,
+                               velocity, panning, pitch)
+
+class Layer(namedtuple('Layer', ['id', 'name', 'lock', 'volume', 'panning'])):
+    def __new__(cls, id, name="", lock=False, volume=100, panning=0):
+        return super().__new__(cls, id, name, lock, volume, panning)
 
 
 def read(filename):
@@ -35,13 +43,13 @@ def read(filename):
 
 
 def new_file(**header):
-    return File(Header(**header), [], [Layer(0, '', 100, 100)], [])
+    return File(Header(**header), [], [Layer(0, '', False, 100, 0)], [])
 
 
 class Header(object):
     def __init__(self, **header):
         header_values = {
-            'version':              header.get('version', 3),
+            'version':              header.get('version', CURRENT_NBS_VERSION),
             'default_instruments':  header.get('default_instruments', 16),
             'song_length':          header.get('song_length', 0),
             'song_layers':          header.get('song_layers', 0),
@@ -61,6 +69,10 @@ class Header(object):
             'blocks_added':         header.get('blocks_added', 0),
             'blocks_removed':       header.get('blocks_removed', 0),
             'song_origin':          header.get('song_origin', ''),
+
+            'loop':                 header.get('loop', False),
+            'max_loop_count':       header.get('max_loop_count', 0),
+            'loop_start':           header.get('loop_start', 0)
         }
 
         for key, value in header_values.items():
@@ -74,15 +86,16 @@ class File(object):
         self.layers = layers
         self.instruments = instruments
 
-    def update_header(self):
+    def update_header(self, version):
+        self.header.version = version
         if self.notes:
             self.header.song_length = self.notes[-1].tick
         self.header.song_layers = len(self.layers)
 
-    def save(self, filename):
-        self.update_header()
+    def save(self, filename, version=CURRENT_NBS_VERSION):
+        self.update_header(self, version)
         with open(filename, 'wb') as buff:
-            Writer(buff).encode_file(self)
+            Writer(buff).encode_file(self, version)
 
     def __iter__(self):
         if not self.notes:
@@ -105,11 +118,12 @@ class Parser(object):
         self.buffer = buff
 
     def read_file(self):
-        use_old_format, values = self.parse_header()
+        values = self.parse_header()
         header = Header(**values)
-        return File(header, list(self.parse_notes()),
-                    list(self.parse_layers(header.song_layers, use_old_format)),
-                    list(self.parse_instruments()))
+        version = values['version']
+        return File(header, list(self.parse_notes(version)),
+                    list(self.parse_layers(header.song_layers, version)),
+                    list(self.parse_instruments(version)))
 
     def read_numeric(self, fmt):
         return fmt.unpack(self.buffer.read(fmt.size))[0]
@@ -129,12 +143,16 @@ class Parser(object):
 
     def parse_header(self):
         song_length = self.read_numeric(SHORT)
-        use_old_format = song_length != 0
+        if song_length == 0:
+            # A song length of 0 indicates the Open Note Block Studio format
+            version = self.read_numeric(BYTE)
+        else:
+            version = 0
 
-        return use_old_format, {
-            'version':             3 if use_old_format else self.read_numeric(BYTE),
-            'default_instruments': 16 if use_old_format else self.read_numeric(BYTE),
-            'song_length':         song_length if use_old_format else self.read_numeric(SHORT),
+        return {
+            'version':             version,
+            'default_instruments': self.read_numeric(BYTE)  if version > 0 else 10,
+            'song_length':         self.read_numeric(SHORT) if version > 0 else song_length,
             'song_layers':         self.read_numeric(SHORT),
             'song_name':           self.read_string(),
             'song_author':         self.read_string(),
@@ -152,35 +170,48 @@ class Parser(object):
             'blocks_added':        self.read_numeric(INT),
             'blocks_removed':      self.read_numeric(INT),
             'song_origin':         self.read_string(),
+            'loop':                self.read_numeric(BYTE) == 1 if version >= 4 else False,
+            'max_loop_count':      self.read_numeric(BYTE)      if version >= 4 else 0,
+            'loop_start':          self.read_numeric(SHORT)     if version >= 4 else 0
         }
 
-    def parse_notes(self):
+    def parse_notes(self, version):
         for current_tick in self.jump():
             for current_layer in self.jump():
-                yield Note(current_tick, current_layer,
-                           self.read_numeric(BYTE), self.read_numeric(BYTE))
+                instrument = self.read_numeric(BYTE)
+                key        = self.read_numeric(BYTE)
+                velocity   = self.read_numeric(BYTE)       if version >= 4 else 100
+                panning    = self.read_numeric(BYTE) - 100 if version >= 4 else 0
+                pitch      = self.read_numeric(SSHORT)     if version >= 4 else 0
+                yield Note(current_tick, current_layer, instrument,
+                           key, velocity, panning, pitch)
 
-    def parse_layers(self, layers_count, use_old_format):
+    def parse_layers(self, layers_count, version):
         for i in range(layers_count):
-            yield Layer(i, self.read_string(), self.read_numeric(BYTE),
-                        100 if use_old_format else self.read_numeric(BYTE))
+            name    = self.read_string()
+            lock    = self.read_numeric(BYTE) == 0  if version >= 4 else False
+            volume  = self.read_numeric(BYTE)
+            panning = self.read_numeric(BYTE) - 100 if version >= 2 else 0
+            yield Layer(i, name, lock, volume, panning)
 
-    def parse_instruments(self):
+    def parse_instruments(self, version):
         for i in range(self.read_numeric(BYTE)):
-            yield Instrument(i, self.read_string(), self.read_string(),
-                             self.read_numeric(BYTE),
-                             self.read_numeric(BYTE) == 1)
+            name       = self.read_string()
+            sound_file = self.read_string()
+            pitch      = self.read_numeric(BYTE)
+            press_key  = self.read_numeric(BYTE) == 1
+            yield Instrument(i, name, sound_file, pitch, press_key)
 
 
 class Writer(object):
     def __init__(self, buff):
         self.buffer = buff
 
-    def encode_file(self, nbs_file):
-        self.write_header(nbs_file)
-        self.write_notes(nbs_file)
-        self.write_layers(nbs_file)
-        self.write_instruments(nbs_file)
+    def encode_file(self, nbs_file, version):
+        self.write_header(nbs_file, version)
+        self.write_notes(nbs_file, version)
+        self.write_layers(nbs_file, version)
+        self.write_instruments(nbs_file, version)
 
     def encode_numeric(self, fmt, value):
         self.buffer.write(fmt.pack(value))
@@ -189,13 +220,17 @@ class Writer(object):
         self.encode_numeric(INT, len(value))
         self.buffer.write(value.encode())
 
-    def write_header(self, nbs_file):
+    def write_header(self, nbs_file, version):
         header = nbs_file.header
 
-        self.encode_numeric(SHORT, 0)
-        self.encode_numeric(BYTE, header.version)
-        self.encode_numeric(BYTE, header.default_instruments)
-        self.encode_numeric(SHORT, header.song_length)
+        if version > 0:
+            self.encode_numeric(SHORT, 0)
+            self.encode_numeric(BYTE, version)
+            self.encode_numeric(BYTE, header.default_instruments)
+        else:
+            self.encode_numeric(SHORT, header.song_length)
+        if version >= 3:
+            self.encode_numeric(SHORT, header.song_length)
         self.encode_numeric(SHORT, header.song_layers)
         self.encode_string(header.song_name)
         self.encode_string(header.song_author)
@@ -214,7 +249,12 @@ class Writer(object):
         self.encode_numeric(INT, header.blocks_removed)
         self.encode_string(header.song_origin)
 
-    def write_notes(self, nbs_file):
+        if version >= 4:
+            self.encode_numeric(BYTE, int(header.loop))
+            self.encode_numeric(BYTE, header.max_loop_count)
+            self.encode_numeric(SHORT, header.loop_start)
+
+    def write_notes(self, nbs_file, version):
         current_tick = -1
 
         for tick, chord in nbs_file:
@@ -227,17 +267,24 @@ class Writer(object):
                 current_layer = note.layer
                 self.encode_numeric(BYTE, note.instrument)
                 self.encode_numeric(BYTE, note.key)
+                if version >= 4:
+                    self.encode_numeric(BYTE, note.velocity)
+                    self.encode_numeric(BYTE, note.panning + 100)
+                    self.encode_numeric(SSHORT, note.pitch)
 
             self.encode_numeric(SHORT, 0)
         self.encode_numeric(SHORT, 0)
 
-    def write_layers(self, nbs_file):
+    def write_layers(self, nbs_file, version):
         for layer in nbs_file.layers:
             self.encode_string(layer.name)
+            if version >= 4:
+                self.encode_numeric(BYTE, int(layer.lock))
             self.encode_numeric(BYTE, layer.volume)
-            self.encode_numeric(BYTE, layer.panning)
+            if version >= 2:
+                self.encode_numeric(BYTE, layer.panning + 100)
 
-    def write_instruments(self, nbs_file):
+    def write_instruments(self, nbs_file, version):
         self.encode_numeric(BYTE, len(nbs_file.instruments))
         for instrument in nbs_file.instruments:
             self.encode_string(instrument.name)
