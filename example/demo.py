@@ -43,3 +43,9 @@ new_file.header.blocks_added = 9000
 # Save file
 
 new_file.save('new_file.nbs')
+
+
+
+# Save file in older version
+
+new_file.save('old_new_file.nbs', version=0)
