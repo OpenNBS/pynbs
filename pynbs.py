@@ -93,7 +93,7 @@ class File(object):
         self.header.song_layers = len(self.layers)
 
     def save(self, filename, version=CURRENT_NBS_VERSION):
-        self.update_header(self, version)
+        self.update_header(version)
         with open(filename, 'wb') as buff:
             Writer(buff).encode_file(self, version)
 
