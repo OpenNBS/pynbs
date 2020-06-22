@@ -7,7 +7,7 @@ with open('README.md') as readme:
 
 setup(
     name='pynbs',
-    version='0.3.0',
+    version='0.4.0',
     license='MIT',
     description='A simple python library to read and write .nbs files from Note Block Studio',
     long_description=long_description,
