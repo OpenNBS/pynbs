@@ -14,10 +14,10 @@ __all__ = ['read', 'new_file', 'Parser', 'Writer', 'File', 'Header',
 
 CURRENT_NBS_VERSION = 4
 
-BYTE = Struct('<b')
-SHORT = Struct('<h')
-SSHORT = Struct('<H')
-INT = Struct('<i')
+BYTE = Struct('<B')
+SHORT = Struct('<H')
+SSHORT = Struct('<h')
+INT = Struct('<I')
 
 
 
