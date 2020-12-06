@@ -152,7 +152,7 @@ class Parser(object):
         return {
             'version':             version,
             'default_instruments': self.read_numeric(BYTE)  if version > 0 else 10,
-            'song_length':         self.read_numeric(SHORT) if version > 0 else song_length,
+            'song_length':         self.read_numeric(SHORT) if version >= 3 else song_length,
             'song_layers':         self.read_numeric(SHORT),
             'song_name':           self.read_string(),
             'song_author':         self.read_string(),
