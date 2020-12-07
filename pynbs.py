@@ -189,7 +189,7 @@ class Parser(object):
     def parse_layers(self, layers_count, version):
         for i in range(layers_count):
             name    = self.read_string()
-            lock    = self.read_numeric(BYTE) == 0  if version >= 4 else False
+            lock    = self.read_numeric(BYTE) == 1  if version >= 4 else False
             volume  = self.read_numeric(BYTE)
             panning = self.read_numeric(BYTE) - 100 if version >= 2 else 0
             yield Layer(i, name, lock, volume, panning)
