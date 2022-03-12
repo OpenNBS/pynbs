@@ -12,7 +12,7 @@ from collections import namedtuple
 __all__ = ['read', 'new_file', 'Parser', 'Writer', 'File', 'Header',
            'Note', 'Layer', 'Instrument']
 
-CURRENT_NBS_VERSION = 4
+CURRENT_NBS_VERSION = 5
 
 BYTE = Struct('<B')
 SHORT = Struct('<H')
