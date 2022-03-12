@@ -130,7 +130,7 @@ class Parser(object):
 
     def read_string(self):
         length = self.read_numeric(INT)
-        return self.buffer.read(length).decode()
+        return self.buffer.read(length).decode(encoding='cp1252')
 
     def jump(self):
         value = -1
@@ -218,7 +218,7 @@ class Writer(object):
 
     def encode_string(self, value):
         self.encode_numeric(INT, len(value))
-        self.buffer.write(value.encode())
+        self.buffer.write(value.encode(encoding='cp1252'))
 
     def write_header(self, nbs_file, version):
         header = nbs_file.header
