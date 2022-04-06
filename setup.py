@@ -15,7 +15,7 @@ setup(
 
     author='Valentin Berlier',
     author_email='berlier.v@gmail.com',
-    url='https://github.com/vberlier/pynbs',
+    url='https://github.com/OpenNBS/pynbs',
 
     platforms=['any'],
     python_requires='>=2.7',

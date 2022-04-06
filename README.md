@@ -201,4 +201,4 @@ for old_file in glob.glob('*.nbs'):
 
 ---
 
-License - [MIT](https://github.com/vberlier/pynbs/blob/master/LICENSE)
+License - [MIT](https://github.com/OpenNBS/pynbs/blob/master/LICENSE)
