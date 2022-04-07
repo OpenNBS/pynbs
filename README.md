@@ -3,9 +3,9 @@
 [![PyPI](https://img.shields.io/pypi/v/pynbs.svg)](https://pypi.org/project/pynbs/)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/pynbs.svg)](https://pypi.org/project/pynbs/)
 
-> A simple python library to read and write [.nbs files](https://hielkeminecraft.github.io/OpenNoteBlockStudio/nbs)
-from [Open Note Block Studio](https://hielkeminecraft.github.io/OpenNoteBlockStudio/). Compatible with
-python 2 and 3.
+> A simple python library to read and write [.nbs files](https://opennbs.org/nbs)
+> from [Open Note Block Studio](https://opennbs.org/). Compatible with
+> python 2 and 3.
 
 `pynbs` makes it possible to easily iterate over Note Block Studio songs.
 
@@ -38,8 +38,8 @@ $ pip install pynbs
 ```
 
 The latest release follows the latest version of the NBS file format
-[specification](https://hielkeminecraft.github.io/OpenNoteBlockStudio/nbs)
 (version 4). However, it also allows you to load and save files in any of
+[specification](https://opennbs.org/nbs)
 the older versions.
 
 ## Basic usage
