@@ -38,8 +38,8 @@ $ pip install pynbs
 ```
 
 The latest release follows the latest version of the NBS file format
-(version 4). However, it also allows you to load and save files in any of
 [specification](https://opennbs.org/nbs)
+(version 5). However, it also allows you to load and save files in any of
 the older versions.
 
 ## Basic usage
