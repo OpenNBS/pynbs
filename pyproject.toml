@@ -1,0 +1,44 @@
+[tool.poetry]
+name = "pynbs"
+version = "0.4.2"
+description = "A simple python library to read and write .nbs files from Note Block Studio"
+authors = ["Valentin Berlier <berlier.v@gmail.com>"]
+license = "MIT"
+
+homepage = "https://github.com/OpenNBS/pynbs"
+repository = "https://github.com/OpenNBS/pynbs"
+documentation = "https://github.com/OpenNBS/pynbs"
+
+readme = "README.md"
+
+keywords = [
+  "minecraft",
+  "note-block-studio",
+  "nbs-files"
+]
+
+include = ["pynbs/py.typed"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+
+[tool.poetry.dev-dependencies]
+black = "^22.3.0"
+isort = "^5.10.1"
+python-semantic-release = "^7.27.1"
+
+[tool.black]
+target-version = ["py38"]
+
+[tool.isort]
+profile = "black"
+
+[tool.semantic_release]
+branch = "main"
+version_variable = ["pynbs/__init__.py:__version__"]
+version_toml = "pyproject.toml:tool.poetry.version"
+build_command = "poetry build"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

@@ -1,39 +1,8 @@
-from setuptools import setup
+#!/usr/bin/env python
 
+# This is a shim to allow GitHub to detect the package. The build is done with poetry.
 
-with open('README.md') as readme:
-    long_description = readme.read()
+import setuptools
 
-
-setup(
-    name='pynbs',
-    version='0.5.0',
-    license='MIT',
-    description='A simple python library to read and write .nbs files from Note Block Studio',
-    long_description=long_description,
-    long_description_content_type='text/markdown',
-
-    author='Valentin Berlier',
-    author_email='berlier.v@gmail.com',
-    url='https://github.com/OpenNBS/pynbs',
-
-    platforms=['any'],
-    python_requires='>=2.7',
-    classifiers=[
-        'Development Status :: 4 - Beta',
-        'Intended Audience :: Developers',
-        'Topic :: Software Development :: Libraries :: Python Modules',
-        'License :: OSI Approved :: MIT License',
-        'Operating System :: OS Independent',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7',
-        'Programming Language :: Python :: 3.8',
-        'Programming Language :: Python :: 3.9',
-    ],
-    keywords='note-block-studio minecraft nbs-files',
-
-    py_modules=['pynbs'],
-)
+if __name__ == "__main__":
+    setuptools.setup(name="pynbs")
