@@ -6,8 +6,7 @@
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
 
 > A simple python library to read and write [.nbs files](https://opennbs.org/nbs)
-> from [Open Note Block Studio](https://opennbs.org/). Compatible with
-> python 2 and 3.
+> from [Open Note Block Studio](https://opennbs.org/).
 
 `pynbs` makes it possible to easily iterate over Note Block Studio songs.
 
