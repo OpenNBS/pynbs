@@ -1,7 +1,9 @@
 # pynbs
 
+[![GitHub Actions](https://github.com/OpenNBS/pynbs/workflows/CI/badge.svg)](https://github.com/OpenNBS/pynbs/actions)
 [![PyPI](https://img.shields.io/pypi/v/pynbs.svg)](https://pypi.org/project/pynbs/)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/pynbs.svg)](https://pypi.org/project/pynbs/)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
 
 > A simple python library to read and write [.nbs files](https://opennbs.org/nbs)
 > from [Open Note Block Studio](https://opennbs.org/). Compatible with
@@ -197,6 +199,28 @@ import pynbs
 
 for old_file in glob.glob('*.nbs'):
     pynbs.read(old_file).save(old_file)
+```
+
+## Contributing
+
+Contributions are welcome. Make sure to first open an issue discussing the problem or the new feature before creating a pull request. The project uses [`poetry`](https://python-poetry.org/).
+
+```bash
+$ poetry install
+```
+
+You can run the tests with `poetry run pytest`.
+
+```bash
+$ poetry run pytest
+```
+
+The code follows the [`black`](https://github.com/psf/black) code style. Import statements are sorted with [`isort`](https://pycqa.github.io/isort/).
+
+```bash
+$ poetry run isort pynbs tests
+$ poetry run black pynbs tests
+$ poetry run black --check pynbs tests
 ```
 
 ---
