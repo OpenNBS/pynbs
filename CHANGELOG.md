@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v1.1.0 (2022-04-10)
+### Feature
+* Publish 1.0 for real ([`fe8fcac`](https://github.com/OpenNBS/pynbs/commit/fe8fcac4397593d65a9109300e20784863fe32e5))
+
 ## v1.0.0-beta.4 (2022-04-10)
 ### Fix
 * Remove note about python 2 compatibility ([`677121a`](https://github.com/OpenNBS/pynbs/commit/677121a6ab086976261dc1031bc83d6175564fca))
