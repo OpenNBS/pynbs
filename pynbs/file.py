@@ -52,8 +52,8 @@ class Layer:
 
 
 def read(filename):
-    with open(filename, "rb") as buff:
-        return Parser(buff).read_file()
+    with open(filename, "rb") as fileobj:
+        return Parser(fileobj).read_file()
 
 
 def new_file(**header):
@@ -100,8 +100,8 @@ class File:
 
     def save(self, filename, version=CURRENT_NBS_VERSION):
         self.update_header(version)
-        with open(filename, "wb") as buff:
-            Writer(buff).encode_file(self, version)
+        with open(filename, "wb") as fileobj:
+            Writer(fileobj).encode_file(self, version)
 
     def __iter__(self):
         if not self.notes:
@@ -120,8 +120,8 @@ class File:
 
 
 class Parser:
-    def __init__(self, buff):
-        self.buffer = buff
+    def __init__(self, fileobj):
+        self.fileobj = fileobj
 
     def read_file(self):
         header = self.parse_header()
@@ -134,11 +134,11 @@ class Parser:
         )
 
     def read_numeric(self, fmt):
-        return fmt.unpack(self.buffer.read(fmt.size))[0]
+        return fmt.unpack(self.fileobj.read(fmt.size))[0]
 
     def read_string(self):
         length = self.read_numeric(INT)
-        return self.buffer.read(length).decode(encoding="cp1252")
+        return self.fileobj.read(length).decode(encoding="cp1252")
 
     def jump(self):
         value = -1
@@ -217,8 +217,8 @@ class Parser:
 
 
 class Writer:
-    def __init__(self, buff):
-        self.buffer = buff
+    def __init__(self, fileobj):
+        self.fileobj = fileobj
 
     def encode_file(self, nbs_file, version):
         self.write_header(nbs_file, version)
@@ -227,11 +227,11 @@ class Writer:
         self.write_instruments(nbs_file, version)
 
     def encode_numeric(self, fmt, value):
-        self.buffer.write(fmt.pack(value))
+        self.fileobj.write(fmt.pack(value))
 
     def encode_string(self, value):
         self.encode_numeric(INT, len(value))
-        self.buffer.write(value.encode(encoding="cp1252"))
+        self.fileobj.write(value.encode(encoding="cp1252"))
 
     def write_header(self, nbs_file, version):
         header = nbs_file.header
