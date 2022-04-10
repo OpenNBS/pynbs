@@ -39,8 +39,10 @@ jobs:
       - name: Install dependencies
         if: steps.cached-venv.outputs.cache-hit != 'true'
         run: poetry install
+      - name: Run tests
+        run: poetry run pytest -v
       - name: Check formatting
-        run: poetry run black --check pynbs
+        run: poetry run black --check pynbs tests
       - name: Release
         if: |
           github.repository == 'OpenNBS/pynbs'
