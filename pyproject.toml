@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pynbs"
-version = "1.0.0-beta.2"
+version = "1.0.0-beta.3"
 description = "A simple python library to read and write .nbs files from Note Block Studio"
 authors = ["Valentin Berlier <berlier.v@gmail.com>", "Bentroen <bemcdc@gmail.com>"]
 license = "MIT"
