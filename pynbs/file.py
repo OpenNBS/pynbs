@@ -11,7 +11,7 @@ __all__ = [
 ]
 
 
-from collections import namedtuple
+from dataclasses import dataclass
 from struct import Struct
 
 CURRENT_NBS_VERSION = 5
@@ -22,23 +22,33 @@ SSHORT = Struct("<h")
 INT = Struct("<I")
 
 
-Instrument = namedtuple("Instrument", ["id", "name", "file", "pitch", "press_key"])
+@dataclass
+class Instrument:
+    id: int
+    name: str
+    file: str
+    pitch: int = 45
+    press_key: bool = True
 
 
-class Note(
-    namedtuple(
-        "Note", ["tick", "layer", "instrument", "key", "velocity", "panning", "pitch"]
-    )
-):
-    def __new__(cls, tick, layer, instrument, key, velocity=100, panning=0, pitch=0):
-        return super().__new__(
-            cls, tick, layer, instrument, key, velocity, panning, pitch
-        )
+@dataclass
+class Note:
+    tick: int
+    layer: int
+    instrument: int
+    key: int
+    velocity: int = 100
+    panning: int = 0
+    pitch: int = 0
 
 
-class Layer(namedtuple("Layer", ["id", "name", "lock", "volume", "panning"])):
-    def __new__(cls, id, name="", lock=False, volume=100, panning=0):
-        return super().__new__(cls, id, name, lock, volume, panning)
+@dataclass
+class Layer:
+    id: int
+    name: str = ""
+    lock: bool = False
+    volume: int = 100
+    panning: int = 0
 
 
 def read(filename):
@@ -50,34 +60,29 @@ def new_file(**header):
     return File(Header(**header), [], [Layer(0, "", False, 100, 0)], [])
 
 
-class Header(object):
-    def __init__(self, **header):
-        header_values = {
-            "version": header.get("version", CURRENT_NBS_VERSION),
-            "default_instruments": header.get("default_instruments", 16),
-            "song_length": header.get("song_length", 0),
-            "song_layers": header.get("song_layers", 0),
-            "song_name": header.get("song_name", ""),
-            "song_author": header.get("song_author", ""),
-            "original_author": header.get("original_author", ""),
-            "description": header.get("description", ""),
-            "tempo": header.get("tempo", 10.0),
-            "auto_save": header.get("auto_save", False),
-            "auto_save_duration": header.get("auto_save_duration", 10),
-            "time_signature": header.get("time_signature", 4),
-            "minutes_spent": header.get("minutes_spent", 0),
-            "left_clicks": header.get("left_clicks", 0),
-            "right_clicks": header.get("right_clicks", 0),
-            "blocks_added": header.get("blocks_added", 0),
-            "blocks_removed": header.get("blocks_removed", 0),
-            "song_origin": header.get("song_origin", ""),
-            "loop": header.get("loop", False),
-            "max_loop_count": header.get("max_loop_count", 0),
-            "loop_start": header.get("loop_start", 0),
-        }
-
-        for key, value in header_values.items():
-            setattr(self, key, value)
+@dataclass
+class Header:
+    version: int = CURRENT_NBS_VERSION
+    default_instruments: int = 16
+    song_length: int = 0
+    song_layers: int = 0
+    song_name: str = ""
+    song_author: str = ""
+    original_author: str = ""
+    description: str = ""
+    tempo: float = 10.0
+    auto_save: bool = False
+    auto_save_duration: int = 10
+    time_signature: int = 4
+    minutes_spent: int = 0
+    left_clicks: int = 0
+    right_clicks: int = 0
+    blocks_added: int = 0
+    blocks_removed: int = 0
+    song_origin: str = ""
+    loop: bool = False
+    max_loop_count: int = 0
+    loop_start: int = 0
 
 
 class File(object):
