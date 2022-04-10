@@ -2,6 +2,9 @@
 
 <!--next-version-placeholder-->
 
+## v1.1.0-beta.0 (2022-04-10)
+
+
 ## v1.1.0 (2022-04-10)
 ### Feature
 * Publish 1.0 for real ([`fe8fcac`](https://github.com/OpenNBS/pynbs/commit/fe8fcac4397593d65a9109300e20784863fe32e5))
