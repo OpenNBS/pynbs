@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v1.0.0-beta.4 (2022-04-10)
+### Fix
+* Remove note about python 2 compatibility ([`677121a`](https://github.com/OpenNBS/pynbs/commit/677121a6ab086976261dc1031bc83d6175564fca))
+
 ## v1.0.0-beta.3 (2022-04-10)
 ### Fix
 * Remove py.typed for now ([`440c96b`](https://github.com/OpenNBS/pynbs/commit/440c96b6152d73b9c03f809ccd1615b723d9345b))
