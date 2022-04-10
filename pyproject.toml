@@ -17,8 +17,6 @@ keywords = [
   "nbs-files"
 ]
 
-include = ["pynbs/py.typed"]
-
 [tool.poetry.dependencies]
 python = "^3.8"
 
