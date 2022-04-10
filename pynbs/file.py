@@ -85,7 +85,7 @@ class Header:
     loop_start: int = 0
 
 
-class File(object):
+class File:
     def __init__(self, header, notes, layers, instruments):
         self.header = header
         self.notes = notes
@@ -119,7 +119,7 @@ class File(object):
         yield current_tick, chord
 
 
-class Parser(object):
+class Parser:
     def __init__(self, buff):
         self.buffer = buff
 
@@ -217,7 +217,7 @@ class Parser(object):
             yield Instrument(i, name, sound_file, pitch, press_key)
 
 
-class Writer(object):
+class Writer:
     def __init__(self, buff):
         self.buffer = buff
 
