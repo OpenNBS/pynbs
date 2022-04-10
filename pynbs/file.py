@@ -124,9 +124,8 @@ class Parser:
         self.buffer = buff
 
     def read_file(self):
-        values = self.parse_header()
-        header = Header(**values)
-        version = values["version"]
+        header = self.parse_header()
+        version = header.version
         return File(
             header,
             list(self.parse_notes(version)),
@@ -158,29 +157,29 @@ class Parser:
         else:
             version = 0
 
-        return {
-            "version": version,
-            "default_instruments": self.read_numeric(BYTE) if version > 0 else 10,
-            "song_length": self.read_numeric(SHORT) if version >= 3 else song_length,
-            "song_layers": self.read_numeric(SHORT),
-            "song_name": self.read_string(),
-            "song_author": self.read_string(),
-            "original_author": self.read_string(),
-            "description": self.read_string(),
-            "tempo": self.read_numeric(SHORT) / 100.0,
-            "auto_save": self.read_numeric(BYTE) == 1,
-            "auto_save_duration": self.read_numeric(BYTE),
-            "time_signature": self.read_numeric(BYTE),
-            "minutes_spent": self.read_numeric(INT),
-            "left_clicks": self.read_numeric(INT),
-            "right_clicks": self.read_numeric(INT),
-            "blocks_added": self.read_numeric(INT),
-            "blocks_removed": self.read_numeric(INT),
-            "song_origin": self.read_string(),
-            "loop": self.read_numeric(BYTE) == 1 if version >= 4 else False,
-            "max_loop_count": self.read_numeric(BYTE) if version >= 4 else 0,
-            "loop_start": self.read_numeric(SHORT) if version >= 4 else 0,
-        }
+        return Header(
+            version=version,
+            default_instruments=self.read_numeric(BYTE) if version > 0 else 10,
+            song_length=self.read_numeric(SHORT) if version >= 3 else song_length,
+            song_layers=self.read_numeric(SHORT),
+            song_name=self.read_string(),
+            song_author=self.read_string(),
+            original_author=self.read_string(),
+            description=self.read_string(),
+            tempo=self.read_numeric(SHORT) / 100.0,
+            auto_save=self.read_numeric(BYTE) == 1,
+            auto_save_duration=self.read_numeric(BYTE),
+            time_signature=self.read_numeric(BYTE),
+            minutes_spent=self.read_numeric(INT),
+            left_clicks=self.read_numeric(INT),
+            right_clicks=self.read_numeric(INT),
+            blocks_added=self.read_numeric(INT),
+            blocks_removed=self.read_numeric(INT),
+            song_origin=self.read_string(),
+            loop=self.read_numeric(BYTE) == 1 if version >= 4 else False,
+            max_loop_count=self.read_numeric(BYTE) if version >= 4 else 0,
+            loop_start=self.read_numeric(SHORT) if version >= 4 else 0,
+        )
 
     def parse_notes(self, version):
         for current_tick in self.jump():
