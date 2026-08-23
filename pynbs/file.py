@@ -108,8 +108,7 @@ class File:
 
     def update_header(self, version: VersionType):
         self.header.version = version
-        if self.notes:
-            self.header.song_length = self.notes[-1].tick
+        self.header.song_length = max((note.tick for note in self.notes), default=0)
         self.header.song_layers = len(self.layers)
 
     def save(
