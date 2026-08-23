@@ -24,6 +24,9 @@ DEFAULT_INSTRUMENT_COUNT = 16
 
 VersionType = int
 
+SUPPORTED_VERSIONS = frozenset({0, 1, 2, 3, 4, 5, 6})
+
+
 BYTE = Struct("<B")
 SHORT = Struct("<H")
 SSHORT = Struct("<h")
@@ -116,6 +119,11 @@ class File:
         filename: FileDescriptorOrPath,
         version: VersionType = CURRENT_NBS_VERSION,
     ):
+        if version not in SUPPORTED_VERSIONS:
+            raise ValueError(
+                f"Unsupported NBS version: {version}. Supported versions are: "
+                f"{', '.join(str(v) for v in SUPPORTED_VERSIONS)}."
+            )
         self.update_header(version)
         with open(filename, "wb") as fileobj:
             Writer(fileobj).encode_file(self, version)
