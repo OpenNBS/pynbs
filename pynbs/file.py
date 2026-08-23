@@ -12,6 +12,7 @@ __all__ = [
 
 
 from dataclasses import dataclass
+from itertools import groupby
 from struct import Struct
 from typing import BinaryIO
 
@@ -121,19 +122,9 @@ class File:
             Writer(fileobj).encode_file(self, version)
 
     def __iter__(self):
-        if not self.notes:
-            return
-        chord = []
-        current_tick = self.notes[0].tick
-
-        for note in sorted(self.notes, key=lambda n: n.tick):
-            if note.tick == current_tick:
-                chord.append(note)
-            else:
-                chord.sort(key=lambda n: n.layer)
-                yield current_tick, chord
-                current_tick, chord = note.tick, [note]
-        yield current_tick, chord
+        notes = sorted(self.notes, key=lambda n: (n.tick, n.layer))
+        for tick, group in groupby(notes, key=lambda n: n.tick):
+            yield tick, list(group)
 
 
 class Parser:
