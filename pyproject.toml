@@ -27,6 +27,9 @@ python-semantic-release = "^7.27.1"
 pytest = "^7.1.1"
 pytest-insta = "^0.1.11"
 
+[tool.pyright]
+typeCheckingMode = "strict"
+
 [tool.black]
 target-version = ["py38"]
 
