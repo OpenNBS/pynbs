@@ -1,13 +1,13 @@
 __all__ = [
-    "read",
-    "new_file",
-    "Parser",
-    "Writer",
     "File",
     "Header",
-    "Note",
-    "Layer",
     "Instrument",
+    "Layer",
+    "Note",
+    "Parser",
+    "Writer",
+    "new_file",
+    "read",
 ]
 
 
