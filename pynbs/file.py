@@ -13,10 +13,9 @@ __all__ = [
 
 from dataclasses import dataclass
 from itertools import groupby
+from os import PathLike
 from struct import Struct
 from typing import BinaryIO
-
-from _typeshed import FileDescriptorOrPath
 
 CURRENT_NBS_VERSION = 5
 
@@ -26,6 +25,8 @@ VersionType = int
 
 SUPPORTED_VERSIONS = frozenset({0, 1, 2, 3, 4, 5, 6})
 
+
+FilePath = str | bytes | PathLike[str] | PathLike[bytes]
 
 BYTE = Struct("<B")
 SHORT = Struct("<H")
@@ -62,7 +63,7 @@ class Layer:
     panning: int = 0
 
 
-def read(filename: FileDescriptorOrPath):
+def read(filename: FilePath):
     with open(filename, "rb") as fileobj:
         return Parser(fileobj).read_file()
 
@@ -116,7 +117,7 @@ class File:
 
     def save(
         self,
-        filename: FileDescriptorOrPath,
+        filename: FilePath,
         version: VersionType = CURRENT_NBS_VERSION,
     ):
         if version not in SUPPORTED_VERSIONS:
