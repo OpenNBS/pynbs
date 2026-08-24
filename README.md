@@ -5,8 +5,8 @@
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/pynbs.svg)](https://pypi.org/project/pynbs/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
 
-> A simple python library to read and write [.nbs files](https://opennbs.org/nbs)
-> from [Open Note Block Studio](https://opennbs.org/).
+> A simple Python library to read and write [.nbs files](https://opennbs.org/nbs)
+> from [Note Block Studio](https://opennbs.org/).
 
 `pynbs` makes it possible to easily iterate over Note Block Studio songs.
 
@@ -40,7 +40,7 @@ $ pip install pynbs
 
 The latest release follows the latest version of the NBS file format
 [specification](https://opennbs.org/nbs)
-(version 5). However, it also allows you to load and save files in any of
+(version 6). However, it also allows you to load and save files in any of
 the older versions.
 
 ## Basic usage
@@ -89,11 +89,11 @@ Attribute                   | Type    | Details
 `header.max_loop_count`     | `int`   | The amount of times to loop. 0 = infinite.
 `header.loop_start`         | `int`   | The tick the song will loop back to at the end of playback.
 
-> For more information about all these fields, check out the [official specification](https://hielkeminecraft.github.io/OpenNoteBlockStudio/nbs).
+> For more information about all these fields, check out the [official specification](https://opennbs.org/nbs).
 
 #### Notes
 
-The `notes` attribute holds a list of all the notes of the song in order.
+The `notes` attribute holds a list of all the notes of the song.
 
 ```python
 first_note = demo_song.notes[0]
@@ -145,7 +145,7 @@ Attribute              | Type   | Details
 ### Iterating over songs
 
 Iterating over a `pynbs` file object yields consecutively all the chords of the song with
-the associated tick.
+the associated tick, in tick and layer order.
 
 ```python
 for tick, chord in demo_song:
@@ -179,11 +179,12 @@ By default, the file will be saved in the latest NBS version available.
 To save the file in an older version, you can use the `version` parameter:
 
 ```python
-# This will save the song in the classic format.
+# This will save the song in the Classic format.
 new_file.save('new_file.nbs', version=0)
 ```
 
-(Keep in mind some of the song properties may be lost when saving in older versions.)
+> [!NOTE]
+> Keep in mind some of the song properties may be lost when saving in older versions.
 
 ### Validating files
 
@@ -203,8 +204,8 @@ new_file.validate()
 
 ### Upgrading old files
 
-While `pynbs` is up-to-date with the latest version of the Open Note Block Studio
-specification, all previous versions — including the original file format — are still
+While `pynbs` is up-to-date with the latest version of the NBS file format
+specification, all previous versions --- including the original file format --- are still
 supported by the `read()` function, making it possible to bulk upgrade songs to the
 most recent version:
 
@@ -236,6 +237,12 @@ The code follows the [`black`](https://github.com/psf/black) code style. Import 
 $ poetry run isort pynbs tests
 $ poetry run black pynbs tests
 $ poetry run black --check pynbs tests
+```
+
+The code must type-check with [`pyright`](https://github.com/microsoft/pyright).
+
+```bash
+$ poetry run pyright
 ```
 
 ---
