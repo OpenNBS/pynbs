@@ -115,16 +115,30 @@ class File:
         self.header.song_length = max((note.tick for note in self.notes), default=0)
         self.header.song_layers = len(self.layers)
 
+    def validate(self):
+        seen: set[tuple[int, int]] = set()
+        for note in self.notes:
+            pos = (note.tick, note.layer)
+            if pos in seen:
+                raise ValueError(
+                    f"Duplicate note found at tick {note.tick}, layer {note.layer}. "
+                    "Ensure no two notes overlap prior to saving."
+                )
+            seen.add(pos)
+
     def save(
         self,
         filename: FilePath,
         version: VersionType = CURRENT_NBS_VERSION,
+        validate: bool = True,
     ):
         if version not in SUPPORTED_VERSIONS:
             raise ValueError(
                 f"Unsupported NBS version: {version}. Supported versions are: "
                 f"{', '.join(str(v) for v in SUPPORTED_VERSIONS)}."
             )
+        if validate:
+            self.validate()
         self.update_header(version)
         with open(filename, "wb") as fileobj:
             Writer(fileobj).encode_file(self, version)

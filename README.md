@@ -185,6 +185,22 @@ new_file.save('new_file.nbs', version=0)
 
 (Keep in mind some of the song properties may be lost when saving in older versions.)
 
+### Validating files
+
+NBS files can only store one note in each tick and layer. Because `notes` is a plain list,  `pynbs` does not check for note collisions upon insertion, which would result in an invalid file.
+
+To prevent this, the song is validated prior to saving, raising a `ValueError` if it contains duplicate notes. You can disable this by setting the `validate` parameter to `False`:
+
+```python
+new_file.save('new_file.nbs', validate=False)
+```
+
+You can manually check if a file is valid by calling the `validate()` method:
+
+```python
+new_file.validate()
+```
+
 ### Upgrading old files
 
 While `pynbs` is up-to-date with the latest version of the Open Note Block Studio
